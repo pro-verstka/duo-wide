@@ -663,14 +663,21 @@
       }
 
       .route {
+        --route-offset: max(
+          0px,
+          (100% - var(--container-max-width) - var(--gutter-start) - var(--gutter-end)) / 2
+        );
+        --route-start: calc(var(--route-offset) + var(--gutter-start));
+        --route-end: calc(var(--route-offset) + var(--gutter-end));
+
         display: flex;
         gap: var(--spacing-16);
         margin: 0;
-        padding: 0 var(--gutter-end) var(--spacing-8) var(--gutter-start);
+        padding: 0 var(--route-end) var(--spacing-8) var(--route-start);
         overflow-x: auto;
         overscroll-behavior-x: contain;
         list-style: none;
-        scroll-padding-inline: var(--gutter-start) var(--gutter-end);
+        scroll-padding-inline: var(--route-start) var(--route-end);
         scroll-snap-type: x mandatory;
         scrollbar-width: none;
       }
