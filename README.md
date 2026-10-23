@@ -4,10 +4,20 @@
 
 **Демо:** https://pro-verstka.github.io/duo-wide/
 
-<p>
-  <img src="screenshots/portrait.png" height="360" alt="Сложенный iPhone Duo в портрете: страница уходит под боковую панель Safari справа" />
-  <img src="screenshots/landscape.png" height="360" alt="Сложенный iPhone Duo в ландшафте: страница уходит под боковую панель Safari слева" />
-</p>
+<table>
+  <tr>
+    <th>До</th>
+    <th>После</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/portrait-before.png" width="260" alt="Без DuoWide: страница обрывается на краю боковой панели Safari справа" /></td>
+    <td><img src="screenshots/portrait-after.png" width="260" alt="С DuoWide: страница уходит под боковую панель Safari справа" /></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/landscape-before.png" width="380" alt="Без DuoWide: в ландшафте под панелью слева пустая полоса" /></td>
+    <td><img src="screenshots/landscape-after.png" width="380" alt="С DuoWide: в ландшафте страница уходит под панель слева" /></td>
+  </tr>
+</table>
 
 ## Проблема
 
