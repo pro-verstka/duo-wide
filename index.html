@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Минимальный набор для сложенного iPhone Duo (1/3): minimum-scale=1 не даёт двойному тапу уменьшить страницу и сбить прокрутку -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1, viewport-fit=cover"
+    />
+    <title>Полярный дневник</title>
+    <style>
+      /*
+        Минимальный набор для сложенного iPhone Duo (2/3).
+        При data-folded body растягивается под боковую панель Safari и сам становится скроллером;
+        dir="rtl" — панель слева (landscape-primary). У <body> должен быть dir="ltr".
+      */
+      [data-folded] {
+        --panel-width: 84px;
+        --bar-height: 80px;
+
+        overflow: hidden;
+        background-color: #ccc;
+      }
+
+      [data-folded] body {
+        overflow: auto;
+        margin: 0 calc(var(--panel-width) * -1) 0 0;
+        height: calc(100vh + var(--bar-height));
+      }
+
+      [data-folded][dir="rtl"] body {
+        margin-right: 0;
+        margin-left: calc(var(--panel-width) * -1);
+      }
+    </style>
+
+    <script>
+      /*
+        Минимальный набор для сложенного iPhone Duo (3/3).
+        fit() узнаёт сложенный вид по зазору между шириной экрана и вьюпортом, ставит data-folded и dir;
+        resetAfterZoom() возвращает прокрутку документа в 0 после зума.
+      */
+      const PANEL_WIDTH = 84;
+
+      const $root = document.documentElement;
+      let zoomTimer;
+
+      const fit = () => {
+        const { type } = screen.orientation;
+        const isLandscape = type.startsWith("landscape");
+        const screenWidth = isLandscape
+          ? Math.max(screen.width, screen.height)
+          : Math.min(screen.width, screen.height);
+        const gap = screenWidth - $root.clientWidth;
+        const isFolded = matchMedia("(pointer: coarse)").matches && gap > 0 && gap <= PANEL_WIDTH;
+
+        $root.toggleAttribute("data-folded", isFolded);
+        $root.dir = isFolded && type === "landscape-primary" ? "rtl" : "ltr";
+        scrollTo(0, scrollY);
+      };
+
+      const resetAfterZoom = () => {
+        clearTimeout(zoomTimer);
+        zoomTimer = setTimeout(() => {
+          if ($root.hasAttribute("data-folded") && Math.abs(visualViewport.scale - 1) < 0.01) {
+            scrollTo(0, 0);
+          }
+        }, 100);
+      };
+
+      fit();
+      addEventListener("resize", fit);
+      screen.orientation.addEventListener("change", fit);
+      visualViewport.addEventListener("resize", resetAfterZoom);
+      visualViewport.addEventListener("scroll", resetAfterZoom);
+    </script>
+  </head>
+  <body dir="ltr">
+    <div class="wrapper">
+      <header class="header">
+        <div class="container header__container">
+          <a class="logo" href="#top">Полярный <span class="logo__accent">дневник</span></a>
+          <nav class="nav" aria-label="Разделы">
+            <a class="nav__link" href="#route">Маршрут</a>
+            <a class="nav__link" href="#gallery">Галерея</a>
+            <a class="nav__link" href="#faq">Вопросы</a>
+          </nav>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="hero" id="top">
+          <div class="hero__sky" aria-hidden="true"></div>
+          <div class="hero__stars" aria-hidden="true"></div>
+          <svg class="hero__mountains" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">
+            <path fill="currentColor" opacity="0.55" d="M0 120 L120 70 L220 110 L360 40 L480 105 L600 60 L720 120 L860 50 L1000 115 L1120 65 L1260 110 L1440 55 V200 H0 Z" />
+            <path fill="currentColor" d="M0 160 L140 110 L260 150 L400 95 L540 155 L680 120 L820 165 L980 105 L1120 160 L1280 120 L1440 150 V200 H0 Z" />
+          </svg>
+
+          <div class="container hero__container">
+            <p class="mode-badge">
+              <span class="mode-badge__dot" aria-hidden="true"></span>
+              <span class="mode-badge__folded">Сложенный вид</span>
+              <span class="mode-badge__unfolded">Разложенный вид</span>
+            </p>
+            <h1 class="hero__title">Пять ночей под северным сиянием</h1>
+            <p class="hero__lead">
+              Маршрут по Кольскому полуострову: от огней Мурманска до тихого Ловозера. Тёплая одежда, термос
+              и очень много неба.
+            </p>
+            <div class="hero__actions">
+              <a class="button" href="#route">Смотреть маршрут</a>
+              <a class="button button_ghost" href="#gallery">Галерея</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section_stats">
+          <div class="container">
+            <ul class="stats" data-reveal>
+              <li class="stat">
+                <span class="stat__value">5</span>
+                <span class="stat__label">ночей в пути</span>
+              </li>
+              <li class="stat">
+                <span class="stat__value">1200</span>
+                <span class="stat__label">км по трассе</span>
+              </li>
+              <li class="stat">
+                <span class="stat__value">−27°</span>
+                <span class="stat__label">самая холодная ночь</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="section" id="route">
+          <div class="container">
+            <div class="section-head" data-reveal>
+              <p class="section-head__kicker">Маршрут</p>
+              <h2 class="section-head__title">Пять дней, пять разных небес</h2>
+              <p class="section-head__text">
+                Листайте карточки: лента, как и фон страницы, уходит под боковую панель Safari.
+              </p>
+            </div>
+          </div>
+
+          <ol class="route" data-reveal>
+            <li class="day-card">
+              <div class="scene scene_city day-card__visual" role="img" aria-label="Огни порта под зелёным небом">
+                <span class="day-card__day">День 1</span>
+              </div>
+              <div class="day-card__body">
+                <h3 class="day-card__title">Мурманск</h3>
+                <p class="day-card__text">Прилетаем, греемся и ловим первые зелёные всполохи над Кольским заливом.</p>
+                <p class="day-card__meta">Старт</p>
+              </div>
+            </li>
+            <li class="day-card">
+              <div class="scene scene_sea day-card__visual" role="img" aria-label="Сияние над морем">
+                <span class="day-card__day">День 2</span>
+              </div>
+              <div class="day-card__body">
+                <h3 class="day-card__title">Териберка</h3>
+                <p class="day-card__text">Дорога к Баренцеву морю, ледяной ветер и сияние прямо над водой.</p>
+                <p class="day-card__meta">130 км</p>
+              </div>
+            </li>
+            <li class="day-card">
+              <div class="scene scene_peaks day-card__visual" role="img" aria-label="Горные вершины под фиолетовым небом">
+                <span class="day-card__day">День 3</span>
+              </div>
+              <div class="day-card__body">
+                <h3 class="day-card__title">Хибины</h3>
+                <p class="day-card__text">Горы, снег по колено и самая яркая ночь всей поездки.</p>
+                <p class="day-card__meta">320 км</p>
+              </div>
+            </li>
+            <li class="day-card">
+              <div class="scene scene_lake day-card__visual" role="img" aria-label="Сияние отражается в озере">
+                <span class="day-card__day">День 4</span>
+              </div>
+              <div class="day-card__body">
+                <h3 class="day-card__title">Ловозеро</h3>
+                <p class="day-card__text">Тишина, лёд и отражение неба в каждой трещине на озере.</p>
+                <p class="day-card__meta">160 км</p>
+              </div>
+            </li>
+            <li class="day-card">
+              <div class="scene scene_dawn day-card__visual" role="img" aria-label="Розовый рассвет над снегом">
+                <span class="day-card__day">День 5</span>
+              </div>
+              <div class="day-card__body">
+                <h3 class="day-card__title">Обратно</h3>
+                <p class="day-card__text">Рассвет в шесть утра, горячий чай и долгая дорога домой.</p>
+                <p class="day-card__meta">590 км</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="section section_surface">
+          <div class="container story">
+            <div class="section-head" data-reveal>
+              <p class="section-head__kicker">Заметки</p>
+              <h2 class="section-head__title">Небо, которое двигается</h2>
+            </div>
+            <div class="story__text" data-reveal>
+              <p class="story__paragraph">
+                Сияние почти никогда не выглядит так, как на фотографиях. Камера копит свет секундами, а глаз видит
+                его вживую: бледную ленту, которая вдруг вспыхивает, расползается по небу и через минуту гаснет.
+              </p>
+              <p class="story__paragraph">
+                Лучшее время — с десяти вечера до двух ночи, подальше от городских огней. Прогноз смотрим по
+                индексу Kp, но решает всё равно облачность: ясное небо важнее любой активности.
+              </p>
+            </div>
+            <blockquote class="quote" data-reveal>
+              <p class="quote__text">
+                «На третью ночь небо стало зелёным от края до края, и мы перестали фотографировать.»
+              </p>
+              <p class="quote__author">Из дневника, Хибины</p>
+            </blockquote>
+          </div>
+        </section>
+
+        <section class="section" id="gallery">
+          <div class="container">
+            <div class="section-head" data-reveal>
+              <p class="section-head__kicker">Галерея</p>
+              <h2 class="section-head__title">Кадры, которые не влезли в телефон</h2>
+            </div>
+            <div class="gallery">
+              <figure class="gallery__item gallery__item_wide" data-reveal>
+                <div class="scene scene_aurora gallery__scene" role="img" aria-label="Ленты сияния над горами"></div>
+                <figcaption class="gallery__caption">Ночь над Хибинами</figcaption>
+              </figure>
+              <figure class="gallery__item" data-reveal>
+                <div class="scene scene_sea gallery__scene" role="img" aria-label="Тёмное море и зелёное небо"></div>
+                <figcaption class="gallery__caption">Баренцево море</figcaption>
+              </figure>
+              <figure class="gallery__item" data-reveal>
+                <div class="scene scene_lake gallery__scene" role="img" aria-label="Небо в отражении озера"></div>
+                <figcaption class="gallery__caption">Ловозеро</figcaption>
+              </figure>
+              <figure class="gallery__item" data-reveal>
+                <div class="scene scene_city gallery__scene" role="img" aria-label="Тёплые огни порта"></div>
+                <figcaption class="gallery__caption">Порт Мурманска</figcaption>
+              </figure>
+              <figure class="gallery__item" data-reveal>
+                <div class="scene scene_peaks gallery__scene" role="img" aria-label="Силуэты вершин"></div>
+                <figcaption class="gallery__caption">Перевал</figcaption>
+              </figure>
+              <figure class="gallery__item gallery__item_wide" data-reveal>
+                <div class="scene scene_dawn gallery__scene" role="img" aria-label="Розовый рассвет"></div>
+                <figcaption class="gallery__caption">Последний рассвет</figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section_surface" id="faq">
+          <div class="container">
+            <div class="section-head" data-reveal>
+              <p class="section-head__kicker">Вопросы</p>
+              <h2 class="section-head__title">Перед поездкой</h2>
+            </div>
+            <div class="faq" data-reveal>
+              <details class="faq__item">
+                <summary class="faq__question">Когда лучше ехать?</summary>
+                <p class="faq__answer">
+                  С конца сентября по март: ночи длинные и тёмные. Самые стабильные месяцы — январь и февраль.
+                </p>
+              </details>
+              <details class="faq__item">
+                <summary class="faq__question">Насколько холодно?</summary>
+                <p class="faq__answer">
+                  Обычно от −10 до −20 °C, но в Хибинах бывает и −30. Спасают термобельё, пуховка и запасные
+                  варежки.
+                </p>
+              </details>
+              <details class="faq__item">
+                <summary class="faq__question">Сияние гарантировано?</summary>
+                <p class="faq__answer">
+                  Нет. Даже при высоком Kp облака могут закрыть всё небо, поэтому в маршруте пять ночей, а не одна.
+                </p>
+              </details>
+              <details class="faq__item">
+                <summary class="faq__question">Нужна ли машина?</summary>
+                <p class="faq__answer">
+                  С ней удобнее: лучшие точки далеко от трассы. Без машины выручают местные туры с выездом на ночь.
+                </p>
+              </details>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="container footer__container">
+          <p class="footer__note">
+            Демо для сложенного iPhone Duo: фон, шапка и лента карточек уходят под боковую панель Safari, а текст
+            остаётся в видимой зоне.
+          </p>
+          <p class="footer__copy">Полярный дневник · 2026</p>
+        </div>
+      </footer>
+    </div>
+
+    <style>
+      :root {
+        --base-font-size: 62.5%;
+
+        --spacing-4: 0.4rem;
+        --spacing-8: 0.8rem;
+        --spacing-12: 1.2rem;
+        --spacing-16: 1.6rem;
+        --spacing-20: 2rem;
+        --spacing-24: 2.4rem;
+        --spacing-32: 3.2rem;
+        --spacing-40: 4rem;
+        --spacing-48: 4.8rem;
+        --spacing-64: 6.4rem;
+        --spacing-96: 9.6rem;
+        --spacing-160: 16rem;
+
+        --color-night: #060a1a;
+        --color-surface: #0d1330;
+        --color-card: #131b40;
+        --color-text: #eef1ff;
+        --color-muted: #a3acd0;
+        --color-line: rgb(255 255 255 / 0.1);
+        --color-aurora: #5ef2b4;
+        --color-violet: #9b8cff;
+        --color-sky: #4cc9f0;
+
+        --base-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        --header-text-font-family: ui-serif, "New York", Georgia, serif;
+
+        --container-max-width: 112rem;
+        --container-gap: var(--spacing-20);
+        --gutter-start: var(--container-gap);
+        --gutter-end: var(--container-gap);
+        --gutter-bottom: 0px;
+
+        --radius: 2rem;
+        --transition-duration: 0.7s;
+        --transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+
+      [data-folded] {
+        --gutter-end: calc(var(--container-gap) + var(--panel-width));
+        --gutter-bottom: var(--bar-height);
+      }
+
+      [data-folded][dir="rtl"] {
+        --gutter-start: calc(var(--container-gap) + var(--panel-width));
+        --gutter-end: var(--container-gap);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: var(--base-font-size);
+        background-color: var(--color-night);
+      }
+
+      html,
+      body {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background-color: var(--color-night);
+        color: var(--color-text);
+        font: 400 1.6rem/1.6 var(--base-font-family);
+        -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      [id] {
+        scroll-margin-top: var(--spacing-64);
+      }
+
+      .container {
+        width: 100%;
+        max-width: calc(var(--container-max-width) + var(--gutter-start) + var(--gutter-end));
+        margin-inline: auto;
+        padding-left: var(--gutter-start);
+        padding-right: var(--gutter-end);
+      }
+
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: 1px solid var(--color-line);
+        background: rgb(6 10 26 / 0.62);
+        -webkit-backdrop-filter: saturate(1.6) blur(16px);
+        backdrop-filter: saturate(1.6) blur(16px);
+      }
+
+      .header__container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        min-height: 5.6rem;
+      }
+
+      .logo {
+        color: var(--color-text);
+        font: 600 2rem/1 var(--header-text-font-family);
+        letter-spacing: -0.01em;
+        text-decoration: none;
+      }
+
+      .logo__accent {
+        color: var(--color-aurora);
+        font-style: italic;
+      }
+
+      .nav {
+        display: flex;
+        gap: var(--spacing-20);
+      }
+
+      @media (max-width: 460px) {
+        .nav {
+          display: none;
+        }
+      }
+
+      .nav__link {
+        color: var(--color-muted);
+        font-size: 1.4rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .nav__link:hover {
+        color: var(--color-text);
+      }
+
+      .hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding-block: var(--spacing-96) var(--spacing-160);
+      }
+
+      .hero__sky {
+        position: absolute;
+        inset: -20% -30%;
+        z-index: -2;
+        background:
+          radial-gradient(40% 30% at 30% 30%, rgb(94 242 180 / 0.55), transparent 70%),
+          radial-gradient(35% 28% at 62% 22%, rgb(76 201 240 / 0.4), transparent 70%),
+          radial-gradient(45% 35% at 80% 40%, rgb(155 140 255 / 0.45), transparent 70%),
+          linear-gradient(180deg, #040714 0%, #0a1233 55%, var(--color-night) 100%);
+        animation: hero-aurora 16s ease-in-out infinite alternate;
+      }
+
+      .hero__stars {
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        opacity: 0.8;
+        background-image:
+          radial-gradient(circle at 8% 12%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 22% 34%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 37% 8%, #fff 0 1.5px, transparent 2px),
+          radial-gradient(circle at 48% 41%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 63% 15%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 71% 37%, #fff 0 1.5px, transparent 2px),
+          radial-gradient(circle at 84% 9%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 93% 28%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 14% 52%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 57% 58%, #fff 0 1px, transparent 1.5px),
+          radial-gradient(circle at 89% 55%, #fff 0 1px, transparent 1.5px);
+      }
+
+      .hero__mountains {
+        position: absolute;
+        inset: auto 0 -1px;
+        z-index: -1;
+        width: 100%;
+        height: 14rem;
+        color: var(--color-night);
+      }
+
+      .hero__container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-20);
+      }
+
+      .hero__title {
+        max-width: 12ch;
+        margin: 0;
+        font: 600 clamp(4rem, 11vw, 7.2rem) / 1.02 var(--header-text-font-family);
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+      }
+
+      .hero__lead {
+        max-width: 36ch;
+        margin: 0;
+        color: rgb(238 241 255 / 0.82);
+        font-size: 1.7rem;
+      }
+
+      .hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-12);
+        padding-top: var(--spacing-8);
+      }
+
+      @keyframes hero-aurora {
+        from {
+          transform: translate3d(-4%, 0, 0) scale(1);
+        }
+
+        to {
+          transform: translate3d(4%, 3%, 0) scale(1.12);
+        }
+      }
+
+      .mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-8);
+        margin: 0;
+        padding: var(--spacing-8) var(--spacing-12);
+        border: 1px solid rgb(255 255 255 / 0.18);
+        border-radius: 99rem;
+        background: rgb(255 255 255 / 0.06);
+        color: var(--color-aurora);
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mode-badge__dot {
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 1.2rem currentColor;
+      }
+
+      .mode-badge__folded,
+      [data-folded] .mode-badge__unfolded {
+        display: none;
+      }
+
+      [data-folded] .mode-badge__folded {
+        display: inline;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--spacing-12) var(--spacing-20);
+        border: 1px solid transparent;
+        border-radius: 99rem;
+        background: var(--color-aurora);
+        color: #04120c;
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s;
+      }
+
+      .button:active {
+        transform: scale(0.97);
+      }
+
+      .button_ghost {
+        border-color: rgb(255 255 255 / 0.22);
+        background: rgb(255 255 255 / 0.08);
+        color: var(--color-text);
+      }
+
+      .section {
+        padding-block: var(--spacing-64);
+      }
+
+      .section_stats {
+        padding-block: 0 var(--spacing-24);
+      }
+
+      .section_surface {
+        border-block: 1px solid var(--color-line);
+        background: linear-gradient(180deg, var(--color-surface), var(--color-night));
+      }
+
+      .section-head {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-8);
+        padding-bottom: var(--spacing-32);
+      }
+
+      .section-head__kicker {
+        margin: 0;
+        color: var(--color-aurora);
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .section-head__title {
+        margin: 0;
+        font: 600 clamp(3rem, 7vw, 4.4rem) / 1.1 var(--header-text-font-family);
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+      }
+
+      .section-head__text {
+        max-width: 52ch;
+        margin: 0;
+        color: var(--color-muted);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-12);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        padding: var(--spacing-16);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        background: rgb(255 255 255 / 0.03);
+      }
+
+      .stat__value {
+        font: 600 2.8rem/1 var(--header-text-font-family);
+      }
+
+      .stat__label {
+        color: var(--color-muted);
+        font-size: 1.3rem;
+        line-height: 1.3;
+      }
+
+      .route {
+        display: flex;
+        gap: var(--spacing-16);
+        margin: 0;
+        padding: 0 var(--gutter-end) var(--spacing-8) var(--gutter-start);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        list-style: none;
+        scroll-padding-inline: var(--gutter-start) var(--gutter-end);
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+      }
+
+      .route::-webkit-scrollbar {
+        display: none;
+      }
+
+      .day-card {
+        display: flex;
+        flex: 0 0 min(28rem, 78%);
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius);
+        background: var(--color-card);
+        scroll-snap-align: start;
+      }
+
+      .day-card__visual {
+        position: relative;
+        aspect-ratio: 4 / 3;
+      }
+
+      .day-card__day {
+        position: absolute;
+        inset: var(--spacing-12) auto auto var(--spacing-12);
+        padding: var(--spacing-4) var(--spacing-12);
+        border-radius: 99rem;
+        background: rgb(6 10 26 / 0.55);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .day-card__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--spacing-8);
+        padding: var(--spacing-16) var(--spacing-20) var(--spacing-20);
+      }
+
+      .day-card__title {
+        margin: 0;
+        font: 600 2.2rem/1.15 var(--header-text-font-family);
+      }
+
+      .day-card__text {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1.45rem;
+        line-height: 1.5;
+      }
+
+      .day-card__meta {
+        margin: auto 0 0;
+        color: var(--color-aurora);
+        font-size: 1.3rem;
+        font-weight: 700;
+      }
+
+      .scene {
+        background: var(--scene);
+      }
+
+      .scene_city {
+        --scene:
+          radial-gradient(70% 45% at 50% 100%, rgb(255 170 90 / 0.55), transparent 70%),
+          radial-gradient(55% 35% at 30% 20%, rgb(94 242 180 / 0.4), transparent 70%),
+          linear-gradient(180deg, #0b1233, #1a1f4d);
+      }
+
+      .scene_sea {
+        --scene:
+          radial-gradient(70% 45% at 40% 12%, rgb(94 242 180 / 0.6), transparent 70%),
+          linear-gradient(180deg, transparent 58%, rgb(94 242 180 / 0.2) 58% 60%, transparent 60%),
+          linear-gradient(180deg, #071233 0 58%, #0b2a44 58% 100%);
+      }
+
+      .scene_peaks {
+        --scene:
+          conic-gradient(from 135deg at 28% 58%, #0a0f26 0 90deg, transparent 0),
+          conic-gradient(from 135deg at 70% 46%, #161f4a 0 90deg, transparent 0),
+          radial-gradient(60% 45% at 55% 10%, rgb(155 140 255 / 0.65), transparent 70%),
+          linear-gradient(180deg, #0a1030, #1d2160);
+      }
+
+      .scene_lake {
+        --scene:
+          radial-gradient(60% 30% at 50% 25%, rgb(94 242 180 / 0.55), transparent 70%),
+          radial-gradient(60% 30% at 50% 75%, rgb(94 242 180 / 0.25), transparent 70%),
+          linear-gradient(180deg, #08102e 0 50%, #0a1a3a 50% 100%);
+      }
+
+      .scene_dawn {
+        --scene:
+          radial-gradient(80% 50% at 50% 100%, rgb(255 140 120 / 0.7), transparent 70%),
+          linear-gradient(180deg, #1a1f4d, #6b3a7a 70%, #f08a6c);
+      }
+
+      .scene_aurora {
+        --scene:
+          linear-gradient(115deg, transparent 30%, rgb(94 242 180 / 0.55) 45%, transparent 60%),
+          linear-gradient(100deg, transparent 45%, rgb(155 140 255 / 0.45) 60%, transparent 75%),
+          linear-gradient(180deg, #050a1f, #0d1640);
+      }
+
+      .story {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: var(--spacing-24) var(--spacing-48);
+        align-items: start;
+      }
+
+      @media (max-width: 700px) {
+        .story {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .story .section-head {
+        grid-column: 1 / -1;
+        padding-bottom: 0;
+      }
+
+      .story__paragraph {
+        margin: 0 0 var(--spacing-16);
+        color: rgb(238 241 255 / 0.86);
+      }
+
+      .quote {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-12);
+        margin: 0;
+        padding: var(--spacing-24);
+        border: 1px solid rgb(255 255 255 / 0.12);
+        border-radius: var(--radius);
+        background: linear-gradient(135deg, rgb(94 242 180 / 0.12), rgb(155 140 255 / 0.14));
+      }
+
+      .quote__text {
+        margin: 0;
+        font: italic 400 2.2rem/1.35 var(--header-text-font-family);
+      }
+
+      .quote__author {
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1.3rem;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        gap: var(--spacing-12);
+      }
+
+      .gallery__item {
+        position: relative;
+        aspect-ratio: 1;
+        margin: 0;
+        overflow: hidden;
+        border-radius: var(--radius);
+      }
+
+      .gallery__item_wide {
+        grid-column: span 2;
+        aspect-ratio: 2 / 1;
+      }
+
+      .gallery__scene {
+        width: 100%;
+        height: 100%;
+      }
+
+      .gallery__caption {
+        position: absolute;
+        inset: auto var(--spacing-12) var(--spacing-12);
+        font-size: 1.3rem;
+        font-weight: 600;
+        text-shadow: 0 1px 8px rgb(0 0 0 / 0.6);
+      }
+
+      .faq {
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .faq__item {
+        border-bottom: 1px solid var(--color-line);
+      }
+
+      .faq__question {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding-block: var(--spacing-20);
+        font-size: 1.7rem;
+        font-weight: 600;
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .faq__question::-webkit-details-marker {
+        display: none;
+      }
+
+      .faq__question::after {
+        content: "+";
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 50%;
+        background: rgb(255 255 255 / 0.08);
+        color: var(--color-aurora);
+        font-size: 2rem;
+        font-weight: 400;
+        transition: transform 0.3s;
+      }
+
+      .faq__item[open] .faq__question::after {
+        transform: rotate(45deg);
+      }
+
+      .faq__answer {
+        margin: 0;
+        padding-bottom: var(--spacing-20);
+        color: var(--color-muted);
+      }
+
+      .footer {
+        border-top: 1px solid var(--color-line);
+        background: var(--color-surface);
+      }
+
+      .footer__container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-12);
+        padding-top: var(--spacing-40);
+        padding-bottom: calc(var(--spacing-40) + var(--gutter-bottom));
+      }
+
+      .footer__note {
+        max-width: 56ch;
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 1.4rem;
+      }
+
+      .footer__copy {
+        margin: 0;
+        color: rgb(163 172 208 / 0.6);
+        font-size: 1.3rem;
+      }
+
+      [data-reveal] {
+        transition:
+          opacity var(--transition-duration) var(--transition-timing-function),
+          transform var(--transition-duration) var(--transition-timing-function);
+      }
+
+      [data-reveal][data-state="hidden"] {
+        opacity: 0;
+        transform: translateY(var(--spacing-24));
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html,
+        body {
+          scroll-behavior: auto;
+        }
+
+        .hero__sky {
+          animation: none;
+        }
+
+        [data-reveal] {
+          transition: none;
+        }
+      }
+    </style>
+
+    <script>
+      const $revealItems = document.querySelectorAll("[data-reveal]");
+
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(({ isIntersecting, target }) => {
+            if (!isIntersecting) return;
+            target.dataset.state = "visible";
+            revealObserver.unobserve(target);
+          });
+        },
+        { rootMargin: "0px 0px -10% 0px" },
+      );
+
+      $revealItems.forEach(($item) => {
+        $item.dataset.state = "hidden";
+        revealObserver.observe($item);
+      });
+    </script>
+  </body>
+</html>
