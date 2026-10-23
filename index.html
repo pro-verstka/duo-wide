@@ -2,80 +2,19 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <!-- Минимальный набор для сложенного iPhone Duo (1/3): minimum-scale=1 не даёт двойному тапу уменьшить страницу и сбить прокрутку -->
+    <!-- Сложенный iPhone Duo: в сложенном виде DuoWide подменяет здесь только width и height; minimum-scale=1 не даёт двойному тапу уменьшить страницу -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1, viewport-fit=cover"
     />
     <title>Полярный дневник</title>
-    <style>
-      /*
-        Минимальный набор для сложенного iPhone Duo (2/3).
-        При data-folded body растягивается под боковую панель Safari и сам становится скроллером;
-        dir="rtl" — панель слева (landscape-primary). У <body> должен быть dir="ltr".
-      */
-      [data-folded] {
-        --panel-width: 84px;
-        --bar-height: 80px;
-
-        overflow: hidden;
-        background-color: #ccc;
-      }
-
-      [data-folded] body {
-        overflow: auto;
-        margin: 0 calc(var(--panel-width) * -1) 0 0;
-        height: calc(100vh + var(--bar-height));
-      }
-
-      [data-folded][dir="rtl"] body {
-        margin-right: 0;
-        margin-left: calc(var(--panel-width) * -1);
-      }
-    </style>
-
+    <link rel="stylesheet" href="duo-wide.css" />
+    <script src="duo-wide.js"></script>
     <script>
-      /*
-        Минимальный набор для сложенного iPhone Duo (3/3).
-        fit() узнаёт сложенный вид по зазору между шириной экрана и вьюпортом, ставит data-folded и dir;
-        resetAfterZoom() возвращает прокрутку документа в 0 после зума.
-      */
-      const PANEL_WIDTH = 84;
-
-      const $root = document.documentElement;
-      let zoomTimer;
-
-      const fit = () => {
-        const { type } = screen.orientation;
-        const isLandscape = type.startsWith("landscape");
-        const screenWidth = isLandscape
-          ? Math.max(screen.width, screen.height)
-          : Math.min(screen.width, screen.height);
-        const gap = screenWidth - $root.clientWidth;
-        const isFolded = matchMedia("(pointer: coarse)").matches && gap > 0 && gap <= PANEL_WIDTH;
-
-        $root.toggleAttribute("data-folded", isFolded);
-        $root.dir = isFolded && type === "landscape-primary" ? "rtl" : "ltr";
-        scrollTo(0, scrollY);
-      };
-
-      const resetAfterZoom = () => {
-        clearTimeout(zoomTimer);
-        zoomTimer = setTimeout(() => {
-          if ($root.hasAttribute("data-folded") && Math.abs(visualViewport.scale - 1) < 0.01) {
-            scrollTo(0, 0);
-          }
-        }, 100);
-      };
-
-      fit();
-      addEventListener("resize", fit);
-      screen.orientation.addEventListener("change", fit);
-      visualViewport.addEventListener("resize", resetAfterZoom);
-      visualViewport.addEventListener("scroll", resetAfterZoom);
+      new DuoWide().init();
     </script>
   </head>
-  <body dir="ltr">
+  <body>
     <div class="wrapper">
       <header class="header">
         <div class="container header__container">
@@ -92,21 +31,28 @@
         <section class="hero" id="top">
           <div class="hero__sky" aria-hidden="true"></div>
           <div class="hero__stars" aria-hidden="true"></div>
-          <svg class="hero__mountains" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">
-            <path fill="currentColor" opacity="0.55" d="M0 120 L120 70 L220 110 L360 40 L480 105 L600 60 L720 120 L860 50 L1000 115 L1120 65 L1260 110 L1440 55 V200 H0 Z" />
-            <path fill="currentColor" d="M0 160 L140 110 L260 150 L400 95 L540 155 L680 120 L820 165 L980 105 L1120 160 L1280 120 L1440 150 V200 H0 Z" />
+          <svg
+            class="hero__mountains"
+            viewBox="0 0 1440 200"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              opacity="0.55"
+              d="M0 120 L120 70 L220 110 L360 40 L480 105 L600 60 L720 120 L860 50 L1000 115 L1120 65 L1260 110 L1440 55 V200 H0 Z"
+            />
+            <path
+              fill="currentColor"
+              d="M0 160 L140 110 L260 150 L400 95 L540 155 L680 120 L820 165 L980 105 L1120 160 L1280 120 L1440 150 V200 H0 Z"
+            />
           </svg>
 
           <div class="container hero__container">
-            <p class="mode-badge">
-              <span class="mode-badge__dot" aria-hidden="true"></span>
-              <span class="mode-badge__folded">Сложенный вид</span>
-              <span class="mode-badge__unfolded">Разложенный вид</span>
-            </p>
             <h1 class="hero__title">Пять ночей под северным сиянием</h1>
             <p class="hero__lead">
-              Маршрут по Кольскому полуострову: от огней Мурманска до тихого Ловозера. Тёплая одежда, термос
-              и очень много неба.
+              Маршрут по Кольскому полуострову: от огней Мурманска до тихого Ловозера. Тёплая
+              одежда, термос и очень много неба.
             </p>
             <div class="hero__actions">
               <a class="button" href="#route">Смотреть маршрут</a>
@@ -147,27 +93,43 @@
 
           <ol class="route" data-reveal>
             <li class="day-card">
-              <div class="scene scene_city day-card__visual" role="img" aria-label="Огни порта под зелёным небом">
+              <div
+                class="scene scene_city day-card__visual"
+                role="img"
+                aria-label="Огни порта под зелёным небом"
+              >
                 <span class="day-card__day">День 1</span>
               </div>
               <div class="day-card__body">
                 <h3 class="day-card__title">Мурманск</h3>
-                <p class="day-card__text">Прилетаем, греемся и ловим первые зелёные всполохи над Кольским заливом.</p>
+                <p class="day-card__text">
+                  Прилетаем, греемся и ловим первые зелёные всполохи над Кольским заливом.
+                </p>
                 <p class="day-card__meta">Старт</p>
               </div>
             </li>
             <li class="day-card">
-              <div class="scene scene_sea day-card__visual" role="img" aria-label="Сияние над морем">
+              <div
+                class="scene scene_sea day-card__visual"
+                role="img"
+                aria-label="Сияние над морем"
+              >
                 <span class="day-card__day">День 2</span>
               </div>
               <div class="day-card__body">
                 <h3 class="day-card__title">Териберка</h3>
-                <p class="day-card__text">Дорога к Баренцеву морю, ледяной ветер и сияние прямо над водой.</p>
+                <p class="day-card__text">
+                  Дорога к Баренцеву морю, ледяной ветер и сияние прямо над водой.
+                </p>
                 <p class="day-card__meta">130 км</p>
               </div>
             </li>
             <li class="day-card">
-              <div class="scene scene_peaks day-card__visual" role="img" aria-label="Горные вершины под фиолетовым небом">
+              <div
+                class="scene scene_peaks day-card__visual"
+                role="img"
+                aria-label="Горные вершины под фиолетовым небом"
+              >
                 <span class="day-card__day">День 3</span>
               </div>
               <div class="day-card__body">
@@ -177,22 +139,34 @@
               </div>
             </li>
             <li class="day-card">
-              <div class="scene scene_lake day-card__visual" role="img" aria-label="Сияние отражается в озере">
+              <div
+                class="scene scene_lake day-card__visual"
+                role="img"
+                aria-label="Сияние отражается в озере"
+              >
                 <span class="day-card__day">День 4</span>
               </div>
               <div class="day-card__body">
                 <h3 class="day-card__title">Ловозеро</h3>
-                <p class="day-card__text">Тишина, лёд и отражение неба в каждой трещине на озере.</p>
+                <p class="day-card__text">
+                  Тишина, лёд и отражение неба в каждой трещине на озере.
+                </p>
                 <p class="day-card__meta">160 км</p>
               </div>
             </li>
             <li class="day-card">
-              <div class="scene scene_dawn day-card__visual" role="img" aria-label="Розовый рассвет над снегом">
+              <div
+                class="scene scene_dawn day-card__visual"
+                role="img"
+                aria-label="Розовый рассвет над снегом"
+              >
                 <span class="day-card__day">День 5</span>
               </div>
               <div class="day-card__body">
                 <h3 class="day-card__title">Обратно</h3>
-                <p class="day-card__text">Рассвет в шесть утра, горячий чай и долгая дорога домой.</p>
+                <p class="day-card__text">
+                  Рассвет в шесть утра, горячий чай и долгая дорога домой.
+                </p>
                 <p class="day-card__meta">590 км</p>
               </div>
             </li>
@@ -207,12 +181,14 @@
             </div>
             <div class="story__text" data-reveal>
               <p class="story__paragraph">
-                Сияние почти никогда не выглядит так, как на фотографиях. Камера копит свет секундами, а глаз видит
-                его вживую: бледную ленту, которая вдруг вспыхивает, расползается по небу и через минуту гаснет.
+                Сияние почти никогда не выглядит так, как на фотографиях. Камера копит свет
+                секундами, а глаз видит его вживую: бледную ленту, которая вдруг вспыхивает,
+                расползается по небу и через минуту гаснет.
               </p>
               <p class="story__paragraph">
-                Лучшее время — с десяти вечера до двух ночи, подальше от городских огней. Прогноз смотрим по
-                индексу Kp, но решает всё равно облачность: ясное небо важнее любой активности.
+                Лучшее время — с десяти вечера до двух ночи, подальше от городских огней. Прогноз
+                смотрим по индексу Kp, но решает всё равно облачность: ясное небо важнее любой
+                активности.
               </p>
             </div>
             <blockquote class="quote" data-reveal>
@@ -232,27 +208,51 @@
             </div>
             <div class="gallery">
               <figure class="gallery__item gallery__item_wide" data-reveal>
-                <div class="scene scene_aurora gallery__scene" role="img" aria-label="Ленты сияния над горами"></div>
+                <div
+                  class="scene scene_aurora gallery__scene"
+                  role="img"
+                  aria-label="Ленты сияния над горами"
+                ></div>
                 <figcaption class="gallery__caption">Ночь над Хибинами</figcaption>
               </figure>
               <figure class="gallery__item" data-reveal>
-                <div class="scene scene_sea gallery__scene" role="img" aria-label="Тёмное море и зелёное небо"></div>
+                <div
+                  class="scene scene_sea gallery__scene"
+                  role="img"
+                  aria-label="Тёмное море и зелёное небо"
+                ></div>
                 <figcaption class="gallery__caption">Баренцево море</figcaption>
               </figure>
               <figure class="gallery__item" data-reveal>
-                <div class="scene scene_lake gallery__scene" role="img" aria-label="Небо в отражении озера"></div>
+                <div
+                  class="scene scene_lake gallery__scene"
+                  role="img"
+                  aria-label="Небо в отражении озера"
+                ></div>
                 <figcaption class="gallery__caption">Ловозеро</figcaption>
               </figure>
               <figure class="gallery__item" data-reveal>
-                <div class="scene scene_city gallery__scene" role="img" aria-label="Тёплые огни порта"></div>
+                <div
+                  class="scene scene_city gallery__scene"
+                  role="img"
+                  aria-label="Тёплые огни порта"
+                ></div>
                 <figcaption class="gallery__caption">Порт Мурманска</figcaption>
               </figure>
               <figure class="gallery__item" data-reveal>
-                <div class="scene scene_peaks gallery__scene" role="img" aria-label="Силуэты вершин"></div>
+                <div
+                  class="scene scene_peaks gallery__scene"
+                  role="img"
+                  aria-label="Силуэты вершин"
+                ></div>
                 <figcaption class="gallery__caption">Перевал</figcaption>
               </figure>
               <figure class="gallery__item gallery__item_wide" data-reveal>
-                <div class="scene scene_dawn gallery__scene" role="img" aria-label="Розовый рассвет"></div>
+                <div
+                  class="scene scene_dawn gallery__scene"
+                  role="img"
+                  aria-label="Розовый рассвет"
+                ></div>
                 <figcaption class="gallery__caption">Последний рассвет</figcaption>
               </figure>
             </div>
@@ -269,26 +269,29 @@
               <details class="faq__item">
                 <summary class="faq__question">Когда лучше ехать?</summary>
                 <p class="faq__answer">
-                  С конца сентября по март: ночи длинные и тёмные. Самые стабильные месяцы — январь и февраль.
+                  С конца сентября по март: ночи длинные и тёмные. Самые стабильные месяцы — январь
+                  и февраль.
                 </p>
               </details>
               <details class="faq__item">
                 <summary class="faq__question">Насколько холодно?</summary>
                 <p class="faq__answer">
-                  Обычно от −10 до −20 °C, но в Хибинах бывает и −30. Спасают термобельё, пуховка и запасные
-                  варежки.
+                  Обычно от −10 до −20 °C, но в Хибинах бывает и −30. Спасают термобельё, пуховка и
+                  запасные варежки.
                 </p>
               </details>
               <details class="faq__item">
                 <summary class="faq__question">Сияние гарантировано?</summary>
                 <p class="faq__answer">
-                  Нет. Даже при высоком Kp облака могут закрыть всё небо, поэтому в маршруте пять ночей, а не одна.
+                  Нет. Даже при высоком Kp облака могут закрыть всё небо, поэтому в маршруте пять
+                  ночей, а не одна.
                 </p>
               </details>
               <details class="faq__item">
                 <summary class="faq__question">Нужна ли машина?</summary>
                 <p class="faq__answer">
-                  С ней удобнее: лучшие точки далеко от трассы. Без машины выручают местные туры с выездом на ночь.
+                  С ней удобнее: лучшие точки далеко от трассы. Без машины выручают местные туры с
+                  выездом на ночь.
                 </p>
               </details>
             </div>
@@ -299,8 +302,8 @@
       <footer class="footer">
         <div class="container footer__container">
           <p class="footer__note">
-            Демо для сложенного iPhone Duo: фон, шапка и лента карточек уходят под боковую панель Safari, а текст
-            остаётся в видимой зоне.
+            Демо для сложенного iPhone Duo: фон, шапка и лента карточек уходят под боковую панель
+            Safari, а текст остаётся в видимой зоне.
           </p>
           <p class="footer__copy">Полярный дневник · 2026</p>
         </div>
@@ -341,7 +344,6 @@
         --container-gap: var(--spacing-20);
         --gutter-start: var(--container-gap);
         --gutter-end: var(--container-gap);
-        --gutter-bottom: 0px;
 
         --radius: 2rem;
         --transition-duration: 0.7s;
@@ -350,10 +352,9 @@
 
       [data-folded] {
         --gutter-end: calc(var(--container-gap) + var(--panel-width));
-        --gutter-bottom: var(--bar-height);
       }
 
-      [data-folded][dir="rtl"] {
+      [data-folded="left"] {
         --gutter-start: calc(var(--container-gap) + var(--panel-width));
         --gutter-end: var(--container-gap);
       }
@@ -374,9 +375,14 @@
         scroll-behavior: smooth;
       }
 
+      /* Safari красит зону под строкой адреса ниже футера фоном body, поэтому он цвета футера, а страницу красит .wrapper */
+      .wrapper {
+        background-color: var(--color-night);
+      }
+
       body {
         margin: 0;
-        background-color: var(--color-night);
+        background-color: var(--color-surface);
         color: var(--color-text);
         font: 400 1.6rem/1.6 var(--base-font-family);
         -webkit-font-smoothing: antialiased;
@@ -430,7 +436,7 @@
         gap: var(--spacing-20);
       }
 
-      @media (max-width: 460px) {
+      @media (max-width: 520px) {
         .nav {
           display: none;
         }
@@ -532,39 +538,6 @@
         to {
           transform: translate3d(4%, 3%, 0) scale(1.12);
         }
-      }
-
-      .mode-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-8);
-        margin: 0;
-        padding: var(--spacing-8) var(--spacing-12);
-        border: 1px solid rgb(255 255 255 / 0.18);
-        border-radius: 99rem;
-        background: rgb(255 255 255 / 0.06);
-        color: var(--color-aurora);
-        font-size: 1.2rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .mode-badge__dot {
-        width: 0.8rem;
-        height: 0.8rem;
-        border-radius: 50%;
-        background: currentColor;
-        box-shadow: 0 0 1.2rem currentColor;
-      }
-
-      .mode-badge__folded,
-      [data-folded] .mode-badge__unfolded {
-        display: none;
-      }
-
-      [data-folded] .mode-badge__folded {
-        display: inline;
       }
 
       .button {
@@ -925,7 +898,7 @@
         flex-direction: column;
         gap: var(--spacing-12);
         padding-top: var(--spacing-40);
-        padding-bottom: calc(var(--spacing-40) + var(--gutter-bottom));
+        padding-bottom: var(--spacing-40);
       }
 
       .footer__note {

@@ -1,0 +1,18 @@
+/*
+  Сложенный iPhone Duo: страница при data-folded шире видимой области на ширину панели.
+  touch-action не даёт ей уезжать вбок,
+  overscroll-behavior-y убирает отскок у краёв: при нём sticky/fixed уезжают вместе со страницей,
+  scrollbar-width прячет горизонтальный индикатор прокрутки (вертикальный скрывается вместе с ним).
+  data-folded="left" — панель слева (landscape-primary), "right" — справа.
+*/
+[data-folded] {
+  --panel-width: 84px;
+
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior-y: none;
+  scrollbar-width: none;
+}
+
+[data-folded]::-webkit-scrollbar {
+  display: none;
+}
